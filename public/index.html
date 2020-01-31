@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+</head>
+<body>
+    
+    <section class="my-3 mx-auto w-50 p-3 bg-info rounded">
+    
+        <form action="/api/peliculas" method="post" class="text-white">
+
+            <h1 class="text-center p-3">Ingreso Peliculas</h1>
+        
+            <div class="form-group">
+                <label for="nombre">Nombre de pelicula:</label>
+                <input type="text" name="nombre" class="form-control" placeholder="Ej: Obi Juan Kenobi">
+                <div class="errorNombre" style="display:none"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="correo">Genero:</label>
+                <input type="email" name="correo" class="form-control" placeholder="Ej: obi.juan@jedi.com">
+                <div class="errorCorreo d-none"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="mensaje">Ingrese su mensaje:</label>
+                <textarea class="w-100" name="mensaje" rows="5" placeholder="Max: 100 caracteres"></textarea>
+                <div class="errorMensaje d-none"></div>
+            </div>
+
+            <input type="submit" class="btn btn-dark btn-md" value="Enviar">
+        
+        </form>
+
+    </section>
+
+</body>
+</html>
