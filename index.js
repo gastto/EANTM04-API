@@ -5,9 +5,9 @@ api = express()
 
 
 // #region base de datos
-
-// Almacenamiento de Datos...
+// #region Almacenamiento de Datos...
 // let peliculas = JSON.parse('[{"titulo":"El padrino","estreno":"1972","description":"Una adaptación ganadora del Premio de la Academia, de la novela de Mario Puzo acerca de la familia Corleone.","poster":"https://images.app.goo.gl/nyPQJbE3QiEB3jti9","trailer":"https://www.youtube.com/watch?v=gCVj1LeYnsc","id":1580860816108},{"titulo":"El padrino 2","estreno":"1980","description":"Una adaptación ganadora del Premio de la Academia, de la novela de Mario Puzo acerca de la familia Corleone.","poster":"https://images.app.goo.gl/nyPQJbE3QiEB3jti9","trailer":"https://www.youtube.com/watch?v=gCVj1LeYnsc","id":1580860856793},{"titulo":"El padrino 3","estreno":"1983","description":"Una adaptación ganadora del Premio de la Academia, de la novela de Mario Puzo acerca de la familia Corleone.","poster":"https://images.app.goo.gl/nyPQJbE3QiEB3jti9","trailer":"https://www.youtube.com/watch?v=gCVj1LeYnsc","id":1580860873865}]')
+// #endregion
 
 const peliculas = easyDB({
     database: '5379e850-124f-4052-a116-fb10f996916c',
@@ -24,15 +24,31 @@ api.listen(8080, function(){
     console.log('listening to port 8080')
 })
 
-api.use(express.urlencoded({extended:false}))
+api.use(express.urlencoded({ extended:true }))
 api.use( express.json() )
 
-api.get('/api/peliculas/', function(req,res){
+api.get('/api/peliculas/:id?', function(req,res){
 
-    let listado = peliculas.get("pelicula", function(error, pelicula){
-        let rta = error ? {rta: "error", message: error} : pelicula
-        res.json( rta )
-    })
+    let elID = req.params.id 
+
+    if( !elID ){ // <-- si no especificó un ID 
+
+        peliculas.list(function(error, listado){
+            let rta = error ? { rta: "error", error } : listado
+            res.json( rta )
+        })
+
+
+    } else { // <-- si efectivamente especificó un ID
+
+        peliculas.get(elID, function(error, pelicula){
+            let rta = error ? {rta: "error", error} : pelicula
+            res.json( rta )
+        })
+
+    }
+
+
 
 })
 
@@ -42,34 +58,40 @@ api.get('/api/peliculas/', function(req,res){
 api.post('/api/peliculas', function(req,res){
 
     let pelicula = req.body
-    pelicula.id = new Date().valueOf()
+    id = new Date().valueOf()
 
-    peliculas.put('pelicula', pelicula, function(error){
+    peliculas.put(id, pelicula, function(error){
         res.json({ rta: "error", message: error })
     })
 
-    res.json({ rta: "ok", message: "Pelicula creada" })
+    res.json({ rta: "ok", message: "Pelicula creada", id })
 })
 
 api.put('/api/peliculas/:id', function(req,res){
     let elID = req.params.id
 
-    let datos = req.body
+    if( !elID ){
+        res.json({ rta: "error", message: "Id no especidicado" })
+    } else {
+        let datos = req.body
+        
+        peliculas.put(elID, datos, function(error, value){
+            let rta = error ? { rta: "error", error } : { rta : "ok" , message: "Pelicula actualizada", id: elID}
+            res.json( rta )
+        })
 
-    let laPelicula = peliculas.find(function(pelicula){
-        return pelicula.id == elID
-    })
-    laPelicula.titulo = datos.titulo || laPelicula.titulo
-    laPelicula.estreno = datos.estreno || laPelicula.estreno
-    laPelicula.descripcion = datos.descripcion || laPelicula.descripcion
-    laPelicula.poster = datos.poster || laPelicula.poster
-    laPelicula.trailer = datos.trailer || laPelicula.trailer
-
-    res.json({ rta: "ok", pelicula : laPelicula })
+    }
 })
 
 api.delete('/api/peliculas/:id', function(req,res){
-    res.end("Aca voy a borrar la pelicula" + req.params.id)
+
+    let elID = req.params.id
+
+    peliculas.delete(elID, function(error){
+        res.json({ rta: "error", error })
+    })
+
+    res.json({ rta: "ok", message: "Pelicula borrada", id: elID })
 })
 
 
