@@ -18,12 +18,19 @@ const peliculas = easyDB({
 
 // #endregion base de datos
 
-const public = express.static("public")
+// settings
+api.set('port', process.env.PORT || 3000);
 
+// statics
+const public = express.static("public")
 api.use( public )
 
-api.listen(8080, function(){
-    console.log('listening to port 8080')
+// middlewares
+
+
+// Starting de server
+api.listen(api.get('port'), function(){
+    console.log(`listening to port ${api.get('port')}`)
 })
 
 api.use(express.urlencoded({ extended:true }))
@@ -49,8 +56,6 @@ api.get('/api/peliculas/:id?', function(req,res){
         })
 
     }
-
-
 
 })
 
@@ -78,7 +83,7 @@ api.put('/api/peliculas/:id', function(req,res){
         let datos = req.body
         
         peliculas.put(elID, datos, function(error, value){
-            let rta = error ? { rta: "error", error } : { rta : "ok" , message: "Pelicula actualizada", id: elID}
+            let rta = error ? { rta: "error", error } : { rta : "ok" , message: "Pelicula actualizada", id: elID }
             res.json( rta )
         })
 
