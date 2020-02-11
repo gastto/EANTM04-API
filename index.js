@@ -5,18 +5,40 @@ api = express()
 
 //cambio de branch
 
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+ 
+// Connection URL
+const url = 'mongodb://localhost:27017';
+ 
+// Database Name
+const dbName = 'baseD';
+ 
+// Use connect method to connect to the server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected successfully to server");
+ 
+  const db = client.db(dbName);
 
-// #region base de datos
-// #region Almacenamiento de Datos...
-// let peliculas = JSON.parse('[{"titulo":"El padrino","estreno":"1972","description":"Una adaptación ganadora del Premio de la Academia, de la novela de Mario Puzo acerca de la familia Corleone.","poster":"https://images.app.goo.gl/nyPQJbE3QiEB3jti9","trailer":"https://www.youtube.com/watch?v=gCVj1LeYnsc","id":1580860816108},{"titulo":"El padrino 2","estreno":"1980","description":"Una adaptación ganadora del Premio de la Academia, de la novela de Mario Puzo acerca de la familia Corleone.","poster":"https://images.app.goo.gl/nyPQJbE3QiEB3jti9","trailer":"https://www.youtube.com/watch?v=gCVj1LeYnsc","id":1580860856793},{"titulo":"El padrino 3","estreno":"1983","description":"Una adaptación ganadora del Premio de la Academia, de la novela de Mario Puzo acerca de la familia Corleone.","poster":"https://images.app.goo.gl/nyPQJbE3QiEB3jti9","trailer":"https://www.youtube.com/watch?v=gCVj1LeYnsc","id":1580860873865}]')
-// #endregion
+  const updateDocument = function(db, callback) {
+    // Get the documents collection
+    const collection = db.collection('usuarios');
+    // Update document where a is 2, set b equal to 1
+    collection.updateOne({ cedula : 2 }
+      , { $set: { b : 1 } }, function(err, result) {
+      assert.equal(err, null);
+      assert.equal(1, result.result.n);
+      console.log("Updated the document with the field a equal to 2");
+      callback(result);
+    });
+  }
+ 
+  client.close();
+});
 
-const peliculas = easyDB({
-    database: '5379e850-124f-4052-a116-fb10f996916c',
-    token: '1ca090b7-1b57-437f-afab-77e8fdd79941'
-  })
 
-// #endregion base de datos
+
 
 // settings
 api.set('port', process.env.PORT || 3000);
