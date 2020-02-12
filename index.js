@@ -1,16 +1,26 @@
 const express = require("express")
+const bodyParser = require('body-parser')
 // const easyDB = require('easydb-io')
 const MongoClient = require('mongodb').MongoClient
+const assert = require('assert');
 
 
+
+// // Connection URL
+// const url = 'mongodb://localhost:27017'
+
+// // Database Name
+// const dbName = 'test'
+// // const collectionName = "mongoTest"
+// const config = {}
+// const client = MongoClient(url, config)
+ 
 // Connection URL
-const url = 'mongodb://localhost:27017'
-
+const url = 'mongodb://localhost:27017';
+ 
 // Database Name
-const dbName = 'test'
-const collectionName = "mongoTest"
-const config = {}
-const client = MongoClient(url, config)
+const dbName = 'test';
+
 
 
 // Use connect method to connect to the server
@@ -28,6 +38,15 @@ const client = MongoClient(url, config)
         //     console.log("Connected successfully to server");
         
         // });
+
+    MongoClient.connect(url, function(err, client) {
+        assert.equal(null, err);
+        console.log("Connected successfully to server");
+        
+        const db = client.db(dbName);
+
+
+    });
         
         
 api = express()
@@ -39,34 +58,61 @@ api.listen(8080, function(){
     console.log('listening to port 8080')
 })
 
-api.use(express.urlencoded({ extended:true }))
-api.use( express.json() )
+api.use(bodyParser.urlencoded({ extended: false }))
+api.use(bodyParser.json())
+// api.use(express.urlencoded({ extended:true }))
+// api.use( express.json() )
 
 api.get('/api/peliculas/', function(req,res){
 
-    const rpa = client.connect(err => {
-        if(err) throw err;
-        
-        const findDocuments = function(db, callback){
-        const db = client.db(dbName)
-        const collection = db.collection(collectionName)
+    const ress = MongoClient.connect(url, function(err, client) {
 
-        collection.find({}).toArray((err,result) => {
-            if(err) throw err;
-            console.log({result}, result.length);
+        const db = client.db(dbName);
 
-            callback(result)
+        const findDocuments = function(db, callback) {
+            assert.equal(null, err);
+            // Get the documents collection
+            const collection = db.collection('mongoTest');
+            // Find some documents
+            collection.find({}).toArray((err, docs) => {
+                assert.equal(err, null);
+                console.log("Found the following records");
+                console.log(docs)
+                callback(docs);
+
+            });
+        }
+
+        findDocuments(db, function() {
             client.close();
-        })
-    }
-        
+        });
+
     })
 
-    res.json({ rpaw: rpa  })
+    res.json({ress})
+
 
 })
 
     
+    
+    // const rpa = client.connect(err => {
+    //     if(err) throw err;
+        
+    //     const findDocuments = function(db, callback){
+    //     const db = client.db(dbName)
+    //     const collection = db.collection(collectionName)
+
+    //     collection.find({}).toArray((err,result) => {
+    //         if(err) throw err;
+    //         console.log({result}, result.length);
+
+    //         callback(result)
+    //         client.close();
+    //     })
+    // }
+        
+    // })
 
     // let elID = req.params.id 
 
