@@ -18,8 +18,8 @@
   },
   "homepage": "https://github.com/gastto/EANTM04-API#readme",
   "dependencies": {
-    "easydb-io": "^2.0.0",
     "express": "^4.17.1",
+    "mongodb": "^3.5.2",
     "nodemon": "^2.0.2"
   }
 }

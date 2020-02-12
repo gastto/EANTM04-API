@@ -1,21 +1,36 @@
 const express = require("express")
-const easyDB = require('easydb-io')
+// const easyDB = require('easydb-io')
+const MongoClient = require('mongodb').MongoClient
 
+
+// Connection URL
+const url = 'mongodb://localhost:27017'
+
+// Database Name
+const dbName = 'test'
+const collectionName = "mongoTest"
+const config = {}
+const client = MongoClient(url, config)
+
+
+// Use connect method to connect to the server
+// client.connect((err) => {
+    //     if(err) throw err;
+    
+    //     const db = client.db(dbName)
+    //     const collection = db.collection(collectionName)
+    
+    //     // collection.find().toArray((err,result) => {
+        //     //     if(err) throw err;
+        //     //     console.log({result}, result.length);
+        //     //     client.close();
+        //     // })
+        //     console.log("Connected successfully to server");
+        
+        // });
+        
+        
 api = express()
-
-
-// #region base de datos
-// #region Almacenamiento de Datos...
-// let peliculas = JSON.parse('[{"titulo":"El padrino","estreno":"1972","description":"Una adaptación ganadora del Premio de la Academia, de la novela de Mario Puzo acerca de la familia Corleone.","poster":"https://images.app.goo.gl/nyPQJbE3QiEB3jti9","trailer":"https://www.youtube.com/watch?v=gCVj1LeYnsc","id":1580860816108},{"titulo":"El padrino 2","estreno":"1980","description":"Una adaptación ganadora del Premio de la Academia, de la novela de Mario Puzo acerca de la familia Corleone.","poster":"https://images.app.goo.gl/nyPQJbE3QiEB3jti9","trailer":"https://www.youtube.com/watch?v=gCVj1LeYnsc","id":1580860856793},{"titulo":"El padrino 3","estreno":"1983","description":"Una adaptación ganadora del Premio de la Academia, de la novela de Mario Puzo acerca de la familia Corleone.","poster":"https://images.app.goo.gl/nyPQJbE3QiEB3jti9","trailer":"https://www.youtube.com/watch?v=gCVj1LeYnsc","id":1580860873865}]')
-// #endregion
-
-const peliculas = easyDB({
-    database: '5379e850-124f-4052-a116-fb10f996916c',
-    token: '1ca090b7-1b57-437f-afab-77e8fdd79941'
-  })
-
-// #endregion base de datos
-
 const public = express.static("public")
 
 api.use( public )
@@ -27,72 +42,101 @@ api.listen(8080, function(){
 api.use(express.urlencoded({ extended:true }))
 api.use( express.json() )
 
-api.get('/api/peliculas/:id?', function(req,res){
+api.get('/api/peliculas/', function(req,res){
 
-    let elID = req.params.id 
+    const rpa = client.connect(err => {
+        if(err) throw err;
+        
+        const findDocuments = function(db, callback){
+        const db = client.db(dbName)
+        const collection = db.collection(collectionName)
 
-    if( !elID ){ // <-- si no especificó un ID 
+        collection.find({}).toArray((err,result) => {
+            if(err) throw err;
+            console.log({result}, result.length);
 
-        peliculas.list(function(error, listado){
-            let rta = error ? { rta: "error", error } : listado
-            res.json( rta )
+            callback(result)
+            client.close();
         })
-
-
-    } else { // <-- si efectivamente especificó un ID
-
-        peliculas.get(elID, function(error, pelicula){
-            let rta = error ? {rta: "error", error} : pelicula
-            res.json( rta )
-        })
-
     }
+        
+    })
 
-
+    res.json({ rpaw: rpa  })
 
 })
+
+    
+
+    // let elID = req.params.id 
+
+    // if( !elID ){ // <-- si no especificó un ID 
+
+    //     peliculas.find(function(error, listado){
+    //         let rta = error ? { rta: "error", error } : listado
+    //         res.json( rta )
+    //     })
+
+
+    // } else { // <-- si efectivamente especificó un ID
+
+    //     peliculas.get(elID, function(error, pelicula){
+    //         let rta = error ? {rta: "error", error} : pelicula
+    //         res.json( rta )
+    //     })
+
+    // }
 
 // Mostrar listado completo
 
+// api.post('/api/peliculas', function(req,res){
 
-api.post('/api/peliculas', function(req,res){
-
-    let pelicula = req.body
-    id = new Date().valueOf()
-
-    peliculas.put(id, pelicula, function(error){
-        res.json({ rta: "error", message: error })
-    })
-
-    res.json({ rta: "ok", message: "Pelicula creada", id })
-})
-
-api.put('/api/peliculas/:id', function(req,res){
-    let elID = req.params.id
-
-    if( !elID ){
-        res.json({ rta: "error", message: "Id no especidicado" })
-    } else {
-        let datos = req.body
+//     client.connect(url, function(err, client) {
+//         if(err) throw err;
         
-        peliculas.put(elID, datos, function(error, value){
-            let rta = error ? { rta: "error", error } : { rta : "ok" , message: "Pelicula actualizada", id: elID}
-            res.json( rta )
-        })
+//         const db = client.db(dbName)
+//         const collection = db.collection(collectionName)
 
-    }
-})
+//         collection.insertOne(id, pelicula, (error, result) => {
+//             console.log({ result });
+//             // res.json({ rta: "error", message: error })
+//             client.close();
+//         })
+    
+//     });
 
-api.delete('/api/peliculas/:id', function(req,res){
+//     let pelicula = req.body
+//     // id = new Date().valueOf()
 
-    let elID = req.params.id
+//     // res.json({ rta: "ok", message: "Pelicula creada", id })
+// })
 
-    peliculas.delete(elID, function(error){
-        res.json({ rta: "error", error })
-    })
+// api.put('/api/peliculas/:id', function(req,res){
+//     let elID = req.params.id
 
-    res.json({ rta: "ok", message: "Pelicula borrada", id: elID })
-})
+//     if( !elID ){
+//         res.json({ rta: "error", message: "Id no especidicado" })
+//     } else {
+//         let datos = req.body
+        
+//         peliculas.put(elID, datos, function(error, value){
+//             let rta = error ? { rta: "error", error } : { rta : "ok" , message: "Pelicula actualizada", id: elID}
+//             res.json( rta )
+//         })
+
+//     }
+// })
+
+// api.delete('/api/peliculas/:id', function(req,res){
+
+//     let elID = req.params.id
+
+//     peliculas.delete(elID, function(error){
+//         res.json({ rta: "error", error })
+//     })
+ 
+//     res.json({ rta: "ok", message: "Pelicula borrada", id: elID })
+// })
 
 
 
